@@ -3,9 +3,6 @@
 #include "Auxiliary.h"
 #include "SingIn.h"
 #include "ChatGUI.h"
-#include "Protocol.h"
-#include "Server.h"
-#include "Client.h"
 
 
 
@@ -19,15 +16,6 @@ int main()
 	DrawSingIn();
 
 	DrawChatGUI();
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Server, CreateMutex(NULL, FALSE, NULL), 0, NULL);
-
-	while (true) {
-		CHAR address[512];
-		cin >> address;
-		cout << "Подкючение к " << address << endl;
-		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Connection, CreateMutex(NULL, FALSE, NULL), 0, NULL);
-		Connection(address);
-	}
 	
 	return 0;
 }
