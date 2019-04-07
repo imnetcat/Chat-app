@@ -85,11 +85,10 @@ class GUI {
             elements[id].type = 2;
             return id;
         }
-        int startInput(int x, int y, int width, int height, int key, int id = -1, void (*enter)(void) = NULL, WORD color = defColor) {
+        int input(int id, char ch, WORD color = defColor, int x = 0, int y = 0, int width = 0, int height = 0) {
             string caption;
             int _x = x,
                 _y = y;
-            char ch;
 
             if (id != -1) {
                 x = elements[id].x;
@@ -98,60 +97,52 @@ class GUI {
                 height = elements[id].height;
                 color = elements[id].color;
                 caption = elements[id].caption;
-                key = stoi(elements[id].key);
                 _x = x + caption.size() % width;
                 _y = y + caption.size() / width;
             }
 
             SetColor(color);
+            SetCurPos(-1, -1);
             SetCurPos(_x, _y);
-            while (ch != key) {
-                ch = _getch();
 
-                if (ch >= 32 && ch <= 126) {
-                    if (_x > x + width - 1) {
-                        _y++;
-                        _x = x;
-                    }
-
-                    if (_y < y + height) {
-                        SetCurPos(_x, _y);
-                        cout << ch;
-                        caption += ch;
-                    } else {
-                        _y--;
-                        _x = x + width - 1;
-                    }
-
-                    _x++;
+            if (ch >= 32 && ch <= 126) {
+                if (_x > x + width - 1) {
+                    _y++;
+                    _x = x;
                 }
 
-                if (ch == 8) {
-                    if (_x > x) {
-                        SetCurPos(_x - 1, _y); 
-                        _x--;
-                    } else if (_y > y) {
-                        SetCurPos(x + width - 1, _y - 1);
-                        _x = x + width - 1;
-                        _y--;
-                    } else ch = -1;
-
-                    if (ch != -1) {
-                        cout << " ";
-                        caption = caption.substr(0, caption.size() - 1);
-                    }
-
+                if (_y < y + height) {
                     SetCurPos(_x, _y);
+                    cout << ch;
+                    caption += ch;
+                } else {
+                    _y--;
+                    _x = x + width - 1;
                 }
 
-                if (ch == 13 && enter) {
-                    ch = key;
-                    (*enter)();
+                _x++;
+            }
+
+            if (ch == 8) {
+                if (_x > x) {
+                    SetCurPos(_x - 1, _y); 
+                    _x--;
+                } else if (_y > y) {
+                    SetCurPos(x + width - 1, _y - 1);
+                    _x = x + width - 1;
+                    _y--;
+                } else ch = -1;
+
+                if (ch != -1) {
+                    cout << " ";
+                    caption = caption.substr(0, caption.size() - 1);
                 }
+
+                SetCurPos(_x, _y);
             }
 
             if (id == -1) {
-                elements.push_back({3, x, y, width, height, "", caption, to_string(key), NULL, color, defColor});
+                elements.push_back({3, x, y, width, height, "", caption, "", NULL, color, defColor});
                 SetColor(defColor);
                 id = elements.size() - 1; 
             } else {
@@ -180,25 +171,10 @@ class GUI {
         vector<Element> elements;
 };
 
-bool ENTER;
-GUI gui;
-int nickname, key;
-void enterPress(void) {
-    ENTER = true;
-    // DO SOMETHING
-    // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
-    //SAMPLE
-    /* if (ERROR) {
-        ENTER = false;
-        SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-        WriteText(3, 24, ERROR_TEXT);
-        SetColor(defColor);
-    } */
-}
-
 VOID DrawChatGUI(VOID) {
     GetConsoleScreenBufferInfo(hStdOut, &csbi);
     defColor = csbi.wAttributes;
+    GUI gui;
 
     system("cls");
     system("mode con cols=80 lines=25");
@@ -219,18 +195,36 @@ VOID DrawChatGUI(VOID) {
         SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
         WriteText(3, 24, "READY");
         SetColor(defColor);
-        nickname = -1;
-        key = -1;
+        int nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
+        int key = gui.input(-1, -1, defColor, 30, 11, 29, 1);
+        SetCurPos(30, 9);
 
+        char ch;
+        string active = "nickname";
+        while (ch != 27) {
+            ch = _getch();
 
-        while (!ENTER) {
-            if (nickname != -1) gui.startInput(0, 0, 0, 0, 0, nickname, enterPress); else nickname = gui.startInput(30, 9, 29, 1, 9, -1, enterPress);
-            SetCurPos(-1, -1);
-            if (!ENTER) if (key != -1) gui.startInput(0, 0, 0, 0, 0, key, enterPress); else key = gui.startInput(30, 11, 29, 1, 9, -1, enterPress);
-            SetCurPos(-1, -1);
+            if (ch == 13) {
+                // DO SOMETHING
+                // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
+                //SAMPLE
+                /* if (ERROR) {
+                    ENTER = false;
+                    SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+                    WriteText(3, 24, ERROR_TEXT);
+                    SetColor(defColor);
+                } */
+            }
+
+            if (ch == 9) {
+                if (active == "nickname") active = "key"; else active = "nickname";
+            }
+
+            if (active == "nickname") 
+                gui.input(nickname, ch);
+            else if (active == "key")
+                gui.input(key, ch);
         }
-
-        ENTER = false;
     }
 
     window = "main";
