@@ -1,5 +1,11 @@
 #pragma once
 
+const string password = "1";
+
+constexpr INT ENTER = 13;
+constexpr INT TAB = 9;
+constexpr INT BACKSPACE = 8;
+
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
 WORD defColor;
@@ -209,17 +215,30 @@ VOID DrawChatGUI(VOID) {
         while (window == "sign_in") {
             ch = _getch();
 
-            if (ch == 13) {
-                // DO SOMETHING
-                // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
-                //SAMPLE
-                /* if (ERROR) {
-                    ENTER = false;
-                    SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-                    WriteText(3, 24, ERROR_TEXT);
-                    SetColor(defColor);
-                } */
-                window = "main"; // IF SUCCESSFULLY SIGNED IN
+            if (ch == ENTER) {
+				string pass = gui.getInputText(nickname);
+				string nick = gui.getInputText(nickname);  // Ёту переменную нужно сохранить, дальше пользователь будет под этим ником в чате писать
+				if (nick != "") {
+					if (pass != "") {
+						if (pass == password) {
+							window = "main"; // SUCCESSFULLY SIGNED IN
+						}else{
+							SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+							WriteText(3, 24, "ѕароль неверный");
+							SetColor(defColor);
+						}
+					}
+					else {
+						SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+						WriteText(3, 24, "¬ведите пароль");
+						SetColor(defColor);
+					}
+				}
+				else {
+					SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+					WriteText(3, 24, "¬ведите никнейм");
+					SetColor(defColor);
+				}
             }
 
             if (ch == 9) {
@@ -248,11 +267,11 @@ VOID DrawChatGUI(VOID) {
         SetColor(defColor);
         int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
 
-        char ch;
+        char ch = 0;
         while (window == "main" && ch != 27) {
             ch = _getch();
 
-            if (ch == 13) {
+            if (ch == ENTER) {
                 // DO SOMETHING
                 // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
                 //SAMPLE
