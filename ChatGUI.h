@@ -27,22 +27,22 @@ class GUI {
     public:
         int drawWindow(int x, int y, int width, int height, string title, WORD color = defColor, WORD borderColor = defColor) {
             SetColor(borderColor);
-            WriteText(x, y, "Ú");
-            WriteText(x + width - 1, y, "¿");
-            WriteText(x, y + height - 1, "À");
-            WriteText(x + width - 1, y + height - 1, "Ù");
+            WriteText(x, y, "Ãš");
+            WriteText(x + width - 1, y, "Â¿");
+            WriteText(x, y + height - 1, "Ã€");
+            WriteText(x + width - 1, y + height - 1, "Ã™");
 
             for (int i = 1; i < width - 1; i++) {
-                WriteText(x + i, y, "Ä");
-                WriteText(x + i, y + height - 1, "Ä");
+                WriteText(x + i, y, "Ã„");
+                WriteText(x + i, y + height - 1, "Ã„");
             }
             for (int i = 1; i < height - 1; i++) {
-                WriteText(x, y + i, "³");
-                WriteText(x + width - 1, y + i, "³");
+                WriteText(x, y + i, "Â³");
+                WriteText(x + width - 1, y + i, "Â³");
             }
 
-            WriteText(x + 1, y, "´");
-            WriteText(x + 2 + title.size(), y, "Ã");
+            WriteText(x + 1, y, "Â´");
+            WriteText(x + 2 + title.size(), y, "Ãƒ");
 
             SetColor(color);
             WriteText(x + 2, y, title);
@@ -67,7 +67,7 @@ class GUI {
         int drawButtonO(int x, int y, string caption, string key, WORD color = defColor, WORD borderColor = defColor) {
             int id = drawButton(x, y, caption, key, color, borderColor);
             SetColor(FOREGROUND_RED);
-            WriteText(x + 4 + key.size() + caption.size(), y, "[þ]");
+            WriteText(x + 4 + key.size() + caption.size(), y, "[Ã¾]");
 
             SetColor(defColor);
             elements[id].active = false;
@@ -84,7 +84,7 @@ class GUI {
             WORD color;
             if (active) color = FOREGROUND_GREEN; else color = FOREGROUND_RED;
             SetColor(color);
-            WriteText(_x + 4 + _key.size() + _caption.size(), _y, "[þ]");
+            WriteText(_x + 4 + _key.size() + _caption.size(), _y, "[Ã¾]");
 
             SetColor(defColor);
             elements[id].active = active;
@@ -202,7 +202,7 @@ VOID DrawChatGUI(VOID) {
         WriteText(29, 11, "[");
         WriteText(59, 9, "]");
         WriteText(59, 11, "]");
-        WriteText(0, 24, "ÄÄ´");
+        WriteText(0, 24, "Ã„Ã„Â´");
         SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
         WriteText(3, 24, "READY");
         SetColor(defColor);
@@ -222,23 +222,21 @@ VOID DrawChatGUI(VOID) {
 					if (pass != "") {
 						if (pass == password) {
 							window = "main"; // SUCCESSFULLY SIGNED IN
-							// JUST DO IT 
-							// á®åà ­¨ ­¨ª­¥©¬ ¤«ï ¤ «ì­¥©è¥£® ¨á¯®«ì§®¢ ­¨ï
 						}else{
 							SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-							WriteText(3, 24, " à®«ì ­¥¢¥à­ë©");
+							WriteText(3, 24, "ÂÂ Ã Â®Â«Ã¬ Â­Â¥Â¢Â¥Ã Â­Ã«Â©");
 							SetColor(defColor);
 						}
 					}
 					else {
 						SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-						WriteText(3, 24, "‚¢¥¤¨â¥ ¯ à®«ì");
+						WriteText(3, 24, "â€šÂ¢Â¥Â¤Â¨Ã¢Â¥ Â¯Â Ã Â®Â«Ã¬");
 						SetColor(defColor);
 					}
 				}
 				else {
 					SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-					WriteText(3, 24, "‚¢¥¤¨â¥ ­¨ª­¥©¬");
+					WriteText(3, 24, "â€šÂ¢Â¥Â¤Â¨Ã¢Â¥ Â­Â¨ÂªÂ­Â¥Â©Â¬");
 					SetColor(defColor);
 				}
             }
@@ -263,7 +261,7 @@ VOID DrawChatGUI(VOID) {
         gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
         gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
         SetColor(FOREGROUND_RED);
-        WriteText(0, 24, "ÄÄ´");
+        WriteText(0, 24, "Ã„Ã„Â´");
         SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
         WriteText(3, 24, "READY");
         SetColor(defColor);
