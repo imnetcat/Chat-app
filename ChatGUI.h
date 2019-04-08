@@ -216,27 +216,29 @@ VOID DrawChatGUI(VOID) {
             ch = _getch();
 
             if (ch == ENTER) {
-				string pass = gui.getInputText(nickname);
-				string nick = gui.getInputText(nickname);  // Ёту переменную нужно сохранить, дальше пользователь будет под этим ником в чате писать
+				string pass = gui.getInputText(key);
+				string nick = gui.getInputText(nickname); 
 				if (nick != "") {
 					if (pass != "") {
 						if (pass == password) {
 							window = "main"; // SUCCESSFULLY SIGNED IN
+							// JUST DO IT 
+							// бЃеа†≠® ≠®™≠•©ђ §Ђп §†Ђм≠•©и•£Ѓ ®бѓЃЂмІЃҐ†≠®п
 						}else{
 							SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-							WriteText(3, 24, "ѕароль неверный");
+							WriteText(3, 24, "П†аЃЂм ≠•Ґ•а≠л©");
 							SetColor(defColor);
 						}
 					}
 					else {
 						SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-						WriteText(3, 24, "¬ведите пароль");
+						WriteText(3, 24, "ВҐ•§®в• ѓ†аЃЂм");
 						SetColor(defColor);
 					}
 				}
 				else {
 					SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-					WriteText(3, 24, "¬ведите никнейм");
+					WriteText(3, 24, "ВҐ•§®в• ≠®™≠•©ђ");
 					SetColor(defColor);
 				}
             }
