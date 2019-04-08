@@ -99,6 +99,11 @@ class GUI {
                 caption = elements[id].caption;
                 _x = x + caption.size() % width;
                 _y = y + caption.size() / width;
+
+                if (_y > y + height - 1) {
+                    _x = x + width;
+                    _y--;
+                }
             }
 
             SetColor(color);
@@ -201,7 +206,50 @@ VOID DrawChatGUI(VOID) {
 
         char ch;
         string active = "nickname";
-        while (ch != 27) {
+        while (window == "sign_in") {
+            ch = _getch();
+
+            if (ch == 13) {
+                // DO SOMETHING
+                // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
+                //SAMPLE
+                /* if (ERROR) {
+                    ENTER = false;
+                    SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+                    WriteText(3, 24, ERROR_TEXT);
+                    SetColor(defColor);
+                } */
+                window = "main"; // IF SUCCESSFULLY SIGNED IN
+            }
+
+            if (ch == 9) {
+                if (active == "nickname") active = "key"; else active = "nickname";
+            }
+
+            if (active == "nickname") 
+                gui.input(nickname, ch);
+            else if (active == "key")
+                gui.input(key, ch);
+        }
+    }
+
+    system("cls");
+
+    if (window == "main") {
+        gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+        gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+        gui.drawWindow(30, 20, 50, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+        gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
+        gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
+        SetColor(FOREGROUND_RED);
+        WriteText(0, 24, "ÄÄ´");
+        SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+        WriteText(3, 24, "READY");
+        SetColor(defColor);
+        int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
+
+        char ch;
+        while (window == "main" && ch != 27) {
             ch = _getch();
 
             if (ch == 13) {
@@ -216,21 +264,8 @@ VOID DrawChatGUI(VOID) {
                 } */
             }
 
-            if (ch == 9) {
-                if (active == "nickname") active = "key"; else active = "nickname";
-            }
-
-            if (active == "nickname") 
-                gui.input(nickname, ch);
-            else if (active == "key")
-                gui.input(key, ch);
+            gui.input(message, ch);
         }
-    }
-
-    window = "main";
-
-    if (window == "main") {
-        //****
     }
 
     system("cls");
