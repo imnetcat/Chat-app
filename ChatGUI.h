@@ -1,24 +1,29 @@
 #pragma once
 
+VOID Server(VOID);
+DWORD WINAPI ServerHandle(CONST HANDLE);
+BOOL addConnection(SOCKET);
+BOOL Connection(CONST CHAR *);
+
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
 WORD defColor;
 
-void SetCurPos(int x, int y) {
-    SetConsoleCursorPosition(hStdOut, {(SHORT)x, (SHORT)y});
-}
-
-void WriteText(int x, int y, string text) {
-    SetCurPos(x, y);
-    cout << text;
-}
-
-void SetColor(WORD color) {
-    SetConsoleTextAttribute(hStdOut, color);
-}
-
 class GUI {
     public:
+		int message = 0;
+		void SetCurPos(int x, int y) {
+			SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
+		}
+		void SetColor(WORD color) {
+			SetConsoleTextAttribute(hStdOut, color);
+		}
+		void WriteText(int x, int y, string text) {
+			SetCurPos(x, y);
+			cout << text;
+			if(message != 0)
+				input(message, -1);
+		}
         int drawWindow(int x, int y, int width, int height, string title, WORD color = defColor, WORD borderColor = defColor) {
             SetColor(borderColor);
             WriteText(x, y, "┌");
@@ -175,6 +180,7 @@ class GUI {
         };
         vector<Element> elements;
 };
+GUI gui;
 
 const string password = "1";
 constexpr INT ENTER = 13;
@@ -183,97 +189,110 @@ constexpr INT TAB = 9;
 constexpr INT BACKSPACE = 8;
 
 VOID DrawChatGUI(VOID) {
-    GetConsoleScreenBufferInfo(hStdOut, &csbi);
-    defColor = csbi.wAttributes;
-    GUI gui;
+	GetConsoleScreenBufferInfo(hStdOut, &csbi);
+	defColor = csbi.wAttributes;
 
-    system("cls");
-    system("mode con cols=80 lines=25");
-    string window = "sign_in";
+	system("cls");
+	system("mode con cols=80 lines=25");
+	string window = "sign_in";
 
-    if (window == "sign_in") {
-        gui.drawWindow(16, 6, 46, 10, "Sign In", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-        gui.drawButton(43, 14, "Enter", "ENTER", defColor, FOREGROUND_RED);
-        gui.drawButton(22, 14, "Switch field", "TAB", defColor, FOREGROUND_RED);
-        WriteText(18, 9, "Nickname:");
-        WriteText(23, 11, "Key:");
-        SetColor(FOREGROUND_RED);
-        WriteText(29, 9, "[");
-        WriteText(29, 11, "[");
-        WriteText(59, 9, "]");
-        WriteText(59, 11, "]");
-        WriteText(0, 24, "──┤");
-        SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-        WriteText(3, 24, "READY");
-        SetColor(defColor);
-        int nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
-        int key = gui.input(-1, -1, defColor, 30, 11, 29, 1);
-        SetCurPos(30, 9);
+	if (window == "sign_in") {
+		gui.drawWindow(16, 6, 46, 10, "Sign In", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawButton(43, 14, "Enter", "ENTER", defColor, FOREGROUND_RED);
+		gui.drawButton(22, 14, "Switch field", "TAB", defColor, FOREGROUND_RED);
+		gui.WriteText(18, 9, "Nickname:");
+		gui.WriteText(23, 11, "Key:");
+		gui.SetColor(FOREGROUND_RED);
+		gui.WriteText(29, 9, "[");
+		gui.WriteText(29, 11, "[");
+		gui.WriteText(59, 9, "]");
+		gui.WriteText(59, 11, "]");
+		gui.WriteText(0, 24, "──┤");
+		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+		gui.WriteText(3, 24, "READY");
+		gui.SetColor(defColor);
+		int nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
+		int key = gui.input(-1, -1, defColor, 30, 11, 29, 1);
+		gui.SetCurPos(30, 9);
 
-        char ch;
-        string active = "nickname";
-        while (window == "sign_in") {
-            ch = _getch();
+		char ch;
+		string active = "nickname";
+		while (window == "sign_in") {
+			ch = _getch();
 
-            if (ch == ENTER) {
-                string pass = gui.getInputText(key);
-                string nick = gui.getInputText(nickname); 
+			if (ch == ENTER) {
+				string pass = gui.getInputText(key);
+				string nick = gui.getInputText(nickname);
 
-                if (nick != "") {
-                    if (pass != "") {
-                        if (pass == password) {
-                            window = "main"; // SUCCESSFULLY SIGNED IN
-                        } else {
-                            SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-                            WriteText(3, 24, "Пароль неверный");
-                            SetColor(defColor);
-                        }
-                    } else {
-                        WriteText(3, 24, "               ");
-                        SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-                        WriteText(3, 24, "Введите пароль");
-                        SetColor(defColor);
-                    }
-                } else {
-                    SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-                    WriteText(3, 24, "Введите никнейм");
-                    SetColor(defColor);
-                }
-            }
+				if (nick != "") {
+					if (pass != "") {
+						if (pass == password) {
+							window = "main"; // SUCCESSFULLY SIGNED IN
+						}
+						else {
+							gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+							gui.WriteText(3, 24, "Пароль неверный");
+							gui.SetColor(defColor);
+						}
+					}
+					else {
+						gui.WriteText(3, 24, "               ");
+						gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+						gui.WriteText(3, 24, "Введите пароль");
+						gui.SetColor(defColor);
+					}
+				}
+				else {
+					gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+					gui.WriteText(3, 24, "Введите никнейм");
+					gui.SetColor(defColor);
+				}
+			}
 
-            if (ch == TAB) {
-                if (active == "nickname") active = "key"; else active = "nickname";
-            }
+			if (ch == TAB) {
+				if (active == "nickname") active = "key"; else active = "nickname";
+			}
 
-            if (active == "nickname") 
-                gui.input(nickname, ch);
-            else if (active == "key")
-                gui.input(key, ch);
-        }
-    }
+			if (active == "nickname")
+				gui.input(nickname, ch);
+			else if (active == "key")
+				gui.input(key, ch);
+		}
+	}
 
-    system("cls");
+	system("cls");
 
-    if (window == "main") {
-        gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-        gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-        gui.drawWindow(30, 20, 49, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-        gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
-        gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
-        SetColor(FOREGROUND_RED);
-        WriteText(0, 24, "──┤");
-        SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-        WriteText(3, 24, "READY");
-        SetColor(defColor);
-        int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
+	if (window == "main") {
+		gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawWindow(30, 20, 49, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
+		gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
+		gui.SetColor(FOREGROUND_RED);
+		gui.WriteText(0, 24, "──┤");
+		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
+		gui.WriteText(3, 24, "READY");
+		gui.SetColor(defColor);
+		gui.message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
 
-        char ch;
-        while (window == "main") {
-            ch = _getch();
+		Server();
 
-            if (ch == ENTER) {
+		char ch;
+		while (window == "main") {
+			ch = _getch();
+
+			if (ch == ENTER) {
+				string inputText = gui.getInputText(gui.message);
+
+				if (inputText[0] == '/') { // Введена комманда
+					size_t pos;
+					if ((pos = inputText.find("/Connect to ")) != string::npos) { // Введена комманда подключения к адресу
+						const char *ip = inputText.substr(13, inputText.length()).c_str();
+						Connection(ip);
+					}
+				}
                 // DO SOMETHING
-                // FOR GET INPUT VALUE USE "gui.getInputText(int id);"
+                // FOR GET INPUT VALUE USE "gui.getInputText(message);"
                 //SAMPLE
                 /* if (ERROR) {
                     ENTER = false;
@@ -286,7 +305,7 @@ VOID DrawChatGUI(VOID) {
 				break;
 			}
 
-            gui.input(message, ch);
+            gui.input(gui.message, ch);
         }
     }
 
