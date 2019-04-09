@@ -11,18 +11,17 @@ WORD defColor;
 
 class GUI {
     public:
-		int message = 0;
+        int inputID = -1;
 		void SetCurPos(int x, int y) {
-			SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
+			SetConsoleCursorPosition(hStdOut, {(SHORT)x, (SHORT)y});
 		}
 		void SetColor(WORD color) {
 			SetConsoleTextAttribute(hStdOut, color);
 		}
-		void WriteText(int x, int y, string text) {
+		void WriteText(int x, int y, string text, int _inputID = -1) {
 			SetCurPos(x, y);
 			cout << text;
-			if(message != 0)
-				input(message, -1);
+			if (_inputID != -1) input(_inputID, -1);
 		}
         int drawWindow(int x, int y, int width, int height, string title, WORD color = defColor, WORD borderColor = defColor) {
             SetColor(borderColor);
@@ -90,7 +89,7 @@ class GUI {
             elements[id].type = 2;
             return id;
         }
-        int input(int id, char ch, WORD color = defColor, int x = 0, int y = 0, int width = 0, int height = 0) {
+        int input(int id, char ch, WORD color = defColor, int x = 0, int y = 0, int width = 0, int height = 0, bool pass = false) {
             string caption;
             int _x = x,
                 _y = y;
@@ -102,6 +101,7 @@ class GUI {
                 height = elements[id].height;
                 color = elements[id].color;
                 caption = elements[id].caption;
+                if (elements[id].key == "true") pass = true;
                 _x = x + caption.size() % width;
                 _y = y + caption.size() / width;
 
@@ -123,7 +123,7 @@ class GUI {
 
                 if (_y < y + height) {
                     SetCurPos(_x, _y);
-                    cout << ch;
+                    if (!pass) cout << ch; else cout << "*";
                     caption += ch;
                 } else {
                     _y--;
@@ -152,7 +152,9 @@ class GUI {
             }
 
             if (id == -1) {
-                elements.push_back({3, x, y, width, height, "", caption, "", NULL, color, defColor});
+                string key = "";
+                if (pass == true) key = "true";
+                elements.push_back({3, x, y, width, height, "", caption, key, NULL, color, defColor});
                 SetColor(defColor);
                 id = elements.size() - 1; 
             } else {
@@ -180,6 +182,7 @@ class GUI {
         };
         vector<Element> elements;
 };
+
 GUI gui;
 
 const string password = "1";
@@ -212,7 +215,7 @@ VOID DrawChatGUI(VOID) {
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
 		int nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
-		int key = gui.input(-1, -1, defColor, 30, 11, 29, 1);
+		int key = gui.input(-1, -1, defColor, 30, 11, 29, 1, true);
 		gui.SetCurPos(30, 9);
 
 		char ch;
@@ -273,7 +276,8 @@ VOID DrawChatGUI(VOID) {
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
-		gui.message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
+		int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
+        gui.inputID = message;
 
 		Server();
 
@@ -282,7 +286,7 @@ VOID DrawChatGUI(VOID) {
 			ch = _getch();
 
 			if (ch == ENTER) {
-				string inputText = gui.getInputText(gui.message);
+				string inputText = gui.getInputText(message);
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
@@ -301,11 +305,12 @@ VOID DrawChatGUI(VOID) {
                     SetColor(defColor);
                 } */
             }
-			if (ch == ESC) {
+
+            if (ch == ESC) {
 				break;
 			}
 
-            gui.input(gui.message, ch);
+            gui.input(message, ch);
         }
     }
 

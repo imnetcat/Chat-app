@@ -21,7 +21,7 @@ BOOL Connection(CONST CHAR *address) {
 		return FALSE;
 	}
 
-	gui.WriteText(3, 24, "Connection made sucessfully");
+	gui.WriteText(3, 24, "Connection made sucessfully", gui.inputID);
 
 	if (addConnection(Sock)) {
 		return FALSE;
