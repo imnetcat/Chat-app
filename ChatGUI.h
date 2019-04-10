@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 
 VOID Server(VOID);
 DWORD WINAPI ServerHandle(CONST HANDLE);
@@ -163,6 +164,46 @@ class GUI {
 
             return id;
         }
+        void processMessageEvent(int windowOutputID, string nickname, string message, int _inputID = -1) {
+            if (message.size() > 0) {
+                int x = elements[windowOutputID].x + 1,
+                    y = elements[windowOutputID].y + 1,
+                    width = elements[windowOutputID].width - 2,
+                    height = elements[windowOutputID].height - 2;
+
+                if (messages.size() < windowOutputID + 1) messages.resize(windowOutputID + 1);
+                if (messages[windowOutputID].size() < height + 5) messages[windowOutputID].resize(height + 5);
+                if (messages[windowOutputID][0].message.size() == 0) messages[windowOutputID][0].message = "0";
+
+                int startPos = stoi(messages[windowOutputID][0].message) + 1;
+                int lines = (message.size() - 1) / width + 1;
+
+                messages[windowOutputID][0].message = to_string(startPos + lines);
+                messages[windowOutputID][startPos].message = nickname;
+                messages[windowOutputID][startPos].color = FOREGROUND_RED;
+
+                for (int i = 1; i <= lines; i++) {
+                    messages[windowOutputID][startPos + i].message = message.substr(width * (i - 1), width);
+                    messages[windowOutputID][startPos + i].color = defColor;
+                }
+
+                if (startPos + lines > height) {
+                    rotate(messages[windowOutputID].begin() + 1, messages[windowOutputID].begin() + startPos + lines - height + 1, messages[windowOutputID].end());
+                    messages[windowOutputID][0].message = to_string(height);
+                }
+
+                string emptyStr(width, ' ');
+                for (int i = 1; i <= height; i++) {
+                    
+                    WriteText(x, y + i - 1, emptyStr);
+                    SetColor(messages[windowOutputID][i].color);
+                    WriteText(x, y + i - 1, messages[windowOutputID][i].message);
+                }
+
+                SetColor(defColor);
+                if (_inputID != -1) input(_inputID, -1);
+            }
+        }
         string getInputText(int id) {
             if (elements[id].caption.size() == 1998913650) return ""; else return elements[id].caption;
         }
@@ -180,7 +221,12 @@ class GUI {
             WORD color;
             WORD borderColor;
         };
+        struct Message {
+            string message;
+            WORD color = defColor;
+        };
         vector<Element> elements;
+        vector<vector<Message>> messages;
 };
 
 GUI gui;
@@ -190,6 +236,9 @@ constexpr INT ENTER = 13;
 constexpr INT ESC = 27;
 constexpr INT TAB = 9;
 constexpr INT BACKSPACE = 8;
+
+int nickname;
+int conversation;
 
 VOID DrawChatGUI(VOID) {
 	GetConsoleScreenBufferInfo(hStdOut, &csbi);
@@ -214,7 +263,7 @@ VOID DrawChatGUI(VOID) {
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
-		int nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
+		nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
 		int key = gui.input(-1, -1, defColor, 30, 11, 29, 1, true);
 		gui.SetCurPos(30, 9);
 
@@ -267,7 +316,7 @@ VOID DrawChatGUI(VOID) {
 
 	if (window == "main") {
 		gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-		gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		conversation = gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
 		gui.drawWindow(30, 20, 49, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
 		gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
 		gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
@@ -287,6 +336,8 @@ VOID DrawChatGUI(VOID) {
 
 			if (ch == ENTER) {
 				string inputText = gui.getInputText(message);
+                // FOR WRITE MESSAGE IN WINDOW USE
+                //gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
@@ -295,6 +346,7 @@ VOID DrawChatGUI(VOID) {
 						Connection(ip);
 					}
 				}
+
                 // DO SOMETHING
                 // FOR GET INPUT VALUE USE "gui.getInputText(message);"
                 //SAMPLE
