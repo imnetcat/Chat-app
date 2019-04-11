@@ -1,7 +1,7 @@
 #pragma once
 
 
-BOOL Connection(CONST CHAR *address) {
+BOOL Connection(string ip) {
 	WSADATA wsaData;
 	int retVal = 0;
 
@@ -13,19 +13,21 @@ BOOL Connection(CONST CHAR *address) {
 
 
 	serverInfo.sin_family = AF_INET;
-	inet_pton(AF_INET, address, &(serverInfo.sin_addr.s_addr));
+	inet_pton(AF_INET, ip.c_str(), &(serverInfo.sin_addr.s_addr));
 	serverInfo.sin_port = htons(toIntA((CHAR*)PROTO.PORT));
 
 	retVal = connect(Sock, (LPSOCKADDR)&serverInfo, sizeof(serverInfo));
 	if (catchErrr(retVal)) {
+		gui.processMessageEvent(conversation, "", "connect() ERROR");
 		return FALSE;
 	}
 
-	gui.WriteText(3, 24, "Connection made sucessfully", gui.inputID);
 
-	if (addConnection(Sock)) {
+	if (!addConnection(Sock)) {
 		return FALSE;
 	}
+
+	gui.processMessageEvent(conversation, "", "Открыто соеденение");
 
 	return TRUE;
 }

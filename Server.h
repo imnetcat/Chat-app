@@ -8,7 +8,7 @@ int fdmax;
 BOOL addConnection(SOCKET s) {
 
 	if (s == -1) {
-		gui.WriteText(3, 24, "[SERVER]--> ERROR", gui.inputID);
+		gui.processMessageEvent(conversation, "", "addConnection() ERROR");
 		closesocket(s);
 		return FALSE;
 	}
@@ -18,9 +18,9 @@ BOOL addConnection(SOCKET s) {
 		if (s > fdmax) { // 
 			fdmax = s;
 		}
-		gui.WriteText(3, 24, "[SERVER]--> New connection accepted", gui.inputID);
+		gui.processMessageEvent(conversation, "", "Новое подключение принято");
 		/* Вывод подключенного ip
-		cout << "[SERVER]--> New connection from " <<
+		cout << "New connection from " <<
 			inet_ntop(remoteaddr.ss_family,
 				get_in_addr((struct sockaddr*)&remoteaddr),
 				remoteIP, INET6_ADDRSTRLEN)
@@ -50,7 +50,7 @@ DWORD WINAPI ServerHandle(CONST HANDLE sMutex) {
 	for (;;) {
 		read_fds = master; // 
 		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
-			gui.WriteText(3, 24, "[SERVER]--> select() error ", gui.inputID);
+			gui.processMessageEvent(conversation, "", "select() ERROR");
 		}
 		// 
 		for (s = 0; s <= fdmax; s++) {
@@ -64,7 +64,7 @@ DWORD WINAPI ServerHandle(CONST HANDLE sMutex) {
 					// 
 					struct sockaddr_storage remoteaddr;
 					socklen_t addrlen;
-					gui.WriteText(3, 24, "[SERVER]--> Accept new connection", gui.inputID);
+					gui.processMessageEvent(conversation, "", "Входящее подключение");
 					addrlen = sizeof remoteaddr;
 					PROTO.clientSock.push_back(accept(PROTO.SOCK,
 						(struct sockaddr *)&remoteaddr,
@@ -78,11 +78,11 @@ DWORD WINAPI ServerHandle(CONST HANDLE sMutex) {
 						// 
 						if (nbytes == 0) {
 							// 
-							gui.WriteText(3, 24, "[SERVER]--> Connection lost", gui.inputID);
+							gui.processMessageEvent(conversation, "", "Подключение потеряно");
 						}
 						else {
 							// 
-							gui.WriteText(3, 24, "[SERVER]--> Connection successfuly closed", gui.inputID);
+							gui.processMessageEvent(conversation, "", "Подключение закрыто");
 						}
 						//
 						PROTO.connections--;
@@ -116,7 +116,7 @@ VOID Server(VOID) {
 	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
 	if (result != 0) {
-		gui.WriteText(3, 24, "WSAStartup() error", gui.inputID);
+		gui.processMessageEvent(conversation, "", "WSAStartup() ERROR");
 		return;
 	}
 
@@ -132,7 +132,7 @@ VOID Server(VOID) {
 	PROTO.ADDR = getServerAddress();
 	result = getaddrinfo(PROTO.ADDR, PROTO.PORT, &hints, &addr);
 	if (result != 0) {
-		gui.WriteText(3, 24, "getaddrinfo() error", gui.inputID);
+		gui.processMessageEvent(conversation, "", "getaddrinfo() ERROR");
 		WSACleanup(); 
 		return;
 	}
@@ -140,7 +140,7 @@ VOID Server(VOID) {
 	PROTO.SOCK = socket(addr->ai_family, addr->ai_socktype,
 		addr->ai_protocol);
 	if (PROTO.SOCK == INVALID_SOCKET) {
-		gui.WriteText(3, 24, "Socket create error", gui.inputID);
+		gui.processMessageEvent(conversation, "", "Socket create ERROR");
 		freeaddrinfo(addr);
 		WSACleanup();
 		return;
@@ -148,7 +148,7 @@ VOID Server(VOID) {
 
 	result = bind(PROTO.SOCK, addr->ai_addr, (int)addr->ai_addrlen);
 	if (result == SOCKET_ERROR) {
-		gui.WriteText(3, 24, "bind() error", gui.inputID);
+		gui.processMessageEvent(conversation, "", "bind() ERROR");
 		freeaddrinfo(addr);
 		closesocket(PROTO.SOCK);
 		WSACleanup();
@@ -156,7 +156,7 @@ VOID Server(VOID) {
 	}
 
 	if (listen(PROTO.SOCK, SOMAXCONN) == SOCKET_ERROR) {
-		gui.WriteText(3, 24, "listen() error", gui.inputID);
+		gui.processMessageEvent(conversation, "", "listen() ERROR");
 		closesocket(PROTO.SOCK);
 		WSACleanup();
 		return;

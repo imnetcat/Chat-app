@@ -4,7 +4,7 @@
 VOID Server(VOID);
 DWORD WINAPI ServerHandle(CONST HANDLE);
 BOOL addConnection(SOCKET);
-BOOL Connection(CONST CHAR *);
+BOOL Connection(string);
 
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -336,15 +336,16 @@ VOID DrawChatGUI(VOID) {
 
 			if (ch == ENTER) {
 				string inputText = gui.getInputText(message);
-                // FOR WRITE MESSAGE IN WINDOW USE
-                //gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
 					if ((pos = inputText.find("/Connect to ")) != string::npos) { // Введена комманда подключения к адресу
-						const char *ip = inputText.substr(13, inputText.length()).c_str();
+						string ip = inputText.substr(12, inputText.length());
 						Connection(ip);
 					}
+				}
+				else { // Введено сообщение
+					gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 				}
 
                 // DO SOMETHING
