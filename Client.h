@@ -13,7 +13,7 @@ BOOL Connection(CONST CHAR *address) {
 
 
 	serverInfo.sin_family = AF_INET;
-	inet_pton_2(AF_INET, address, &(serverInfo.sin_addr.s_addr));
+	inet_pton(AF_INET, address, &(serverInfo.sin_addr.s_addr));
 	serverInfo.sin_port = htons(toIntA((CHAR*)PROTO.PORT));
 
 	retVal = connect(Sock, (LPSOCKADDR)&serverInfo, sizeof(serverInfo));
