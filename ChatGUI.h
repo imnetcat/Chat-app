@@ -171,8 +171,8 @@ class GUI {
                     width = elements[windowOutputID].width - 2,
                     height = elements[windowOutputID].height - 2;
 
-                if (messages.size() < windowOutputID + 1) messages.resize(windowOutputID + 1);
-                if (messages[windowOutputID].size() < height + 5) messages[windowOutputID].resize(height + 5);
+                if ((int)messages.size() < windowOutputID + 1) messages.resize(windowOutputID + 1);
+                if ((int)messages[windowOutputID].size() < height + 5) messages[windowOutputID].resize(height + 5);
                 if (messages[windowOutputID][0].message.size() == 0) messages[windowOutputID][0].message = "0";
 
                 int startPos = stoi(messages[windowOutputID][0].message) + 1;
