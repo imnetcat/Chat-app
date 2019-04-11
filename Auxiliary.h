@@ -58,7 +58,7 @@ PSTR getServerAddress() {
 	ret = GetIpAddrTable(pIPAddrTable, &dwSize, 0);        // Заполнение pIPAddrTable актуальными данными
 	IPAddr.S_un.S_addr = (u_long)pIPAddrTable->table[0].dwAddr;
 	PSTR stringAddr = new CHAR[16];
-	inet_ntop_2(AF_INET, &IPAddr, stringAddr, 16);
+	inet_ntop(AF_INET, &IPAddr, stringAddr, 16);
 	delete[] pIPAddrTable;
 	return stringAddr;
 }

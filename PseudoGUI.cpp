@@ -1,6 +1,5 @@
 
 #include "pch.h"
-#include "inet_.h" // for inet_pton&inet_ntop in mingw
 #include "Auxiliary.h"
 #include "ChatGUI.h"
 #include "Protocol.h"
