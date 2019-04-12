@@ -211,7 +211,7 @@ class GUI {
 			string emptyStr(elements[id].width, ' ');
 
 			for (int i = 0; i < elements[id].height; i++) {
-				WriteText(elements[id].x, elements[id].y, emptyStr);
+				WriteText(elements[id].x, elements[id].y + i, emptyStr);
 			}
 
 			SetCurPos(elements[id].x, elements[id].y);
