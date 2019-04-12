@@ -14,7 +14,7 @@ class GUI {
     public:
         int inputID = -1;
 		void SetCurPos(int x, int y) {
-			SetConsoleCursorPosition(hStdOut, {(SHORT)x, (SHORT)y});
+			SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
 		}
 		void SetColor(WORD color) {
 			SetConsoleTextAttribute(hStdOut, color);
@@ -41,32 +41,32 @@ class GUI {
             }
 
             WriteText(x + 1, y, "┤");
-            WriteText(x + 2 + title.size(), y, "├");
+            WriteText(x + 2 + (int)title.size(), y, "├");
 
             SetColor(color);
             WriteText(x + 2, y, title);
 
-            elements.push_back({0, x, y, width, height, title, "", "", NULL, color, borderColor});
+            elements.push_back({ 0, x, y, width, height, title, "", "", NULL, color, borderColor });
             SetColor(defColor);
-            return elements.size() - 1;
+            return (int)elements.size() - 1;
         }
         int drawButton(int x, int y, string caption, string key, WORD color = defColor, WORD borderColor = defColor) {
             SetColor(borderColor);
             WriteText(x, y, "[");
-            WriteText(x + 2 + key.size() - 1, y, "]");
+            WriteText(x + 2 + (int)key.size() - 1, y, "]");
 
             SetColor(color);
             WriteText(x + 1, y, key);
-            WriteText(x + 3 + key.size(), y, caption);
+            WriteText(x + 3 + (int)key.size(), y, caption);
 
-            elements.push_back({1, x, y, 0, 0, "", caption, key, NULL, color, borderColor});
+            elements.push_back({ 1, x, y, 0, 0, "", caption, key, NULL, color, borderColor });
             SetColor(defColor);
-            return elements.size() - 1; 
+            return (int)elements.size() - 1;
         }
         int drawButtonO(int x, int y, string caption, string key, WORD color = defColor, WORD borderColor = defColor) {
             int id = drawButton(x, y, caption, key, color, borderColor);
             SetColor(FOREGROUND_RED);
-            WriteText(x + 4 + key.size() + caption.size(), y, "[■]");
+            WriteText(x + 4 + (int)key.size() + (int)caption.size(), y, "[■]");
 
             SetColor(defColor);
             elements[id].active = false;
@@ -83,7 +83,7 @@ class GUI {
             WORD color;
             if (active) color = FOREGROUND_GREEN; else color = FOREGROUND_RED;
             SetColor(color);
-            WriteText(_x + 4 + _key.size() + _caption.size(), _y, "[■]");
+            WriteText(_x + 4 + (int)_key.size() + (int)_caption.size(), _y, "[■]");
 
             SetColor(defColor);
             elements[id].active = active;
@@ -103,8 +103,8 @@ class GUI {
                 color = elements[id].color;
                 caption = elements[id].caption;
                 if (elements[id].key == "true") pass = true;
-                _x = x + caption.size() % width;
-                _y = y + caption.size() / width;
+                _x = x + (int)caption.size() % width;
+                _y = y + (int)caption.size() / width;
 
                 if (_y > y + height - 1) {
                     _x = x + width;
@@ -155,9 +155,9 @@ class GUI {
             if (id == -1) {
                 string key = "";
                 if (pass == true) key = "true";
-                elements.push_back({3, x, y, width, height, "", caption, key, NULL, color, defColor});
+                elements.push_back({ 3, x, y, width, height, "", caption, key, NULL, color, defColor });
                 SetColor(defColor);
-                id = elements.size() - 1; 
+                id = (int)elements.size() - 1;
             } else {
                 elements[id].caption = caption;
             }
@@ -176,7 +176,7 @@ class GUI {
                 if (messages[windowOutputID][0].message.size() == 0) messages[windowOutputID][0].message = "0";
 
                 int startPos = stoi(messages[windowOutputID][0].message) + 1;
-                int lines = (message.size() - 1) / width + 1;
+                int lines = ((int)message.size() - 1) / width + 1;
 
                 messages[windowOutputID][0].message = to_string(startPos + lines);
                 messages[windowOutputID][startPos].message = nickname;
@@ -246,26 +246,29 @@ VOID DrawChatGUI(VOID) {
 
 	system("cls");
 	system("mode con cols=80 lines=25");
+	SetConsoleScreenBufferSize(hStdOut, { 80, 26 });
+	ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
 	string window = "sign_in";
 
 	if (window == "sign_in") {
-		gui.drawWindow(16, 6, 46, 10, "Sign In", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-		gui.drawButton(43, 14, "Enter", "ENTER", defColor, FOREGROUND_RED);
-		gui.drawButton(22, 14, "Switch field", "TAB", defColor, FOREGROUND_RED);
-		gui.WriteText(18, 9, "Nickname:");
-		gui.WriteText(23, 11, "Key:");
+		gui.drawWindow(17, 7, 46, 10, "Sign In", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawButton(44, 15, "Enter", "ENTER", defColor, FOREGROUND_RED);
+		gui.drawButton(23, 15, "Switch field", "TAB", defColor, FOREGROUND_RED);
+		gui.WriteText(19, 10, "Nickname:");
+		gui.WriteText(24, 12, "Key:");
 		gui.SetColor(FOREGROUND_RED);
-		gui.WriteText(29, 9, "[");
-		gui.WriteText(29, 11, "[");
-		gui.WriteText(59, 9, "]");
-		gui.WriteText(59, 11, "]");
+		gui.WriteText(30, 10, "[");
+		gui.WriteText(30, 12, "[");
+		gui.WriteText(60, 10, "]");
+		gui.WriteText(60, 12, "]");
 		gui.WriteText(0, 24, "──┤");
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
-		nickname = gui.input(-1, -1, defColor, 30, 9, 29, 1);
-		int key = gui.input(-1, -1, defColor, 30, 11, 29, 1, true);
-		gui.SetCurPos(30, 9);
+		gui.SetCurPos(0, 0);
+		ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
+		int key = gui.input(-1, -1, defColor, 31, 12, 29, 1, true);
+		nickname = gui.input(-1, -1, defColor, 31, 10, 29, 1);
 
 		char ch;
 		string active = "nickname";
@@ -317,7 +320,7 @@ VOID DrawChatGUI(VOID) {
 	if (window == "main") {
 		gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
 		conversation = gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-		gui.drawWindow(30, 20, 49, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawWindow(30, 20, 50, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
 		gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
 		gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
 		gui.SetColor(FOREGROUND_RED);
@@ -325,6 +328,8 @@ VOID DrawChatGUI(VOID) {
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
+		gui.SetCurPos(0, 0);
+		ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
 		int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
         gui.inputID = message;
 
@@ -336,6 +341,8 @@ VOID DrawChatGUI(VOID) {
 
 			if (ch == ENTER) {
 				string inputText = gui.getInputText(message);
+                // FOR WRITE MESSAGE IN WINDOW USE
+                //gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
@@ -343,8 +350,7 @@ VOID DrawChatGUI(VOID) {
 						string ip = inputText.substr(12, inputText.length());
 						Connection(ip);
 					}
-				}
-				else { // Введено сообщение
+				} else { // Введено сообщение
 					gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 				}
 
