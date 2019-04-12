@@ -246,8 +246,6 @@ VOID DrawChatGUI(VOID) {
 
 	system("cls");
 	system("mode con cols=80 lines=25");
-	SetConsoleScreenBufferSize(hStdOut, { 80, 26 });
-	ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
 	string window = "sign_in";
 
 	if (window == "sign_in") {
@@ -266,7 +264,6 @@ VOID DrawChatGUI(VOID) {
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
 		gui.SetCurPos(0, 0);
-		ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
 		int key = gui.input(-1, -1, defColor, 31, 12, 29, 1, true);
 		nickname = gui.input(-1, -1, defColor, 31, 10, 29, 1);
 
@@ -319,8 +316,8 @@ VOID DrawChatGUI(VOID) {
 
 	if (window == "main") {
 		gui.drawWindow(0, 0, 30, 24, "Menu", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-		conversation = gui.drawWindow(30, 0, 50, 20, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
-		gui.drawWindow(30, 20, 50, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		conversation = gui.drawWindow(30, 0, 50, 19, "Conversation", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
+		gui.drawWindow(30, 19, 50, 5, "Input", FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED, FOREGROUND_GREEN);
 		gui.drawButton(2, 2, "Send", "ENTER", defColor, FOREGROUND_RED);
 		gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
 		gui.SetColor(FOREGROUND_RED);
@@ -329,8 +326,7 @@ VOID DrawChatGUI(VOID) {
 		gui.WriteText(3, 24, "READY");
 		gui.SetColor(defColor);
 		gui.SetCurPos(0, 0);
-		ShowScrollBar(GetConsoleWindow(), SB_BOTH, false);
-		int message = gui.input(-1, -1, defColor, 31, 21, 48, 3);
+		int message = gui.input(-1, -1, defColor, 31, 20, 48, 3);
         gui.inputID = message;
 
 		Server();
