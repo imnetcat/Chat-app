@@ -207,6 +207,16 @@ class GUI {
         string getInputText(int id) {
             if (elements[id].caption.size() == 1998913650) return ""; else return elements[id].caption;
         }
+		void clearInput(int id) {
+			string emptyStr(elements[id].width, ' ');
+
+			for (int i = 0; i < elements[id].height; i++) {
+				WriteText(elements[id].x, elements[id].y, emptyStr);
+			}
+
+			SetCurPos(elements[id].x, elements[id].y);
+			elements[id].caption = "";
+		}
     private:
         struct Element {
             int type;
@@ -348,6 +358,7 @@ VOID DrawChatGUI(VOID) {
 					}
 				} else { // Введено сообщение
 					gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
+					gui.clearInput(message);
 				}
 
                 // DO SOMETHING
