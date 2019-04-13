@@ -72,7 +72,7 @@ VOID WINAPI ServerHandle(LPVOID p) {
 
 	if (sock == INVALID_SOCKET)
 	{
-		gui.processMessageEvent(conversation, "", "failed to create socket");
+		gui.processMessageEvent(conversation, "Error", "failed to create socket");
 		return;
 	}
 
@@ -83,7 +83,7 @@ VOID WINAPI ServerHandle(LPVOID p) {
 
 	if (bind(sock, (const sockaddr*)&address, sizeof(address)) == INVALID_SOCKET)
 	{
-		gui.processMessageEvent(conversation, "", "failed to bind socket");
+		gui.processMessageEvent(conversation, "Error", "failed to bind socket");
 		return;
 	}
 
@@ -107,7 +107,7 @@ VOID WINAPI ServerHandle(LPVOID p) {
 	}
 
 	//  Сервер и клиент открыты, вывод ip сервера
-	gui.WriteText(3, 24, PROTO.ADDR + string(":") + toStrA(PROTO.PORT), gui.inputID);
+	gui.WriteText(3, 24, PROTO.ADDR + string(":") + toStrA(PROTO.PORT), gui.inputID, true);
 
 
 
@@ -133,7 +133,7 @@ VOID WINAPI ServerHandle(LPVOID p) {
 		// process received packet
 		PROTOCOL::PACKET packet = ParseAndDecrypt(packet_data);
 
-		gui.processMessageEvent(conversation, packet.senderNick, packet.message, gui.inputID);
+		gui.processMessageEvent(conversation, packet.senderNick, packet.message.substr(1, (int)packet.message.size() - 1), gui.inputID);
 	}
 
 	return;

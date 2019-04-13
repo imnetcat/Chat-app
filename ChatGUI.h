@@ -19,9 +19,19 @@ class GUI {
 		void SetColor(WORD color) {
 			SetConsoleTextAttribute(hStdOut, color);
 		}
-		void WriteText(int x, int y, string text, int _inputID = -1) {
+		void WriteText(int x, int y, string text, int _inputID = -1, bool debug = false) {
 			SetCurPos(x, y);
-			cout << text;
+			if (debug) {
+				CONSOLE_SCREEN_BUFFER_INFO _csbi;
+				GetConsoleScreenBufferInfo(hStdOut, &_csbi);
+				string emptyStr(_csbi.srWindow.Right - (int)text.size() - 3, ' ');
+				WORD color = csbi.wAttributes;
+
+				cout << text;
+				SetColor(defColor);
+				cout << emptyStr;
+				SetColor(color);
+			} else cout << text;
 			if (_inputID != -1) input(_inputID, -1);
 		}
         int drawWindow(int x, int y, int width, int height, string title, WORD color = defColor, WORD borderColor = defColor) {
@@ -293,20 +303,19 @@ VOID DrawChatGUI(VOID) {
 						}
 						else {
 							gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-							gui.WriteText(3, 24, "Пароль неверный");
+							gui.WriteText(3, 24, "Пароль неверный", -1, true);
 							gui.SetColor(defColor);
 						}
 					}
 					else {
-						gui.WriteText(3, 24, "               ");
 						gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-						gui.WriteText(3, 24, "Введите пароль");
+						gui.WriteText(3, 24, "Введите пароль", -1, true);
 						gui.SetColor(defColor);
 					}
 				}
 				else {
 					gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-					gui.WriteText(3, 24, "Введите никнейм");
+					gui.WriteText(3, 24, "Введите никнейм", -1, true);
 					gui.SetColor(defColor);
 				}
 			}
@@ -333,7 +342,7 @@ VOID DrawChatGUI(VOID) {
 		gui.SetColor(FOREGROUND_RED);
 		gui.WriteText(0, 24, "──┤");
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-		gui.WriteText(3, 24, "start server with /start [port]");
+		gui.WriteText(3, 24, "start server with /start [port]", -1, true);
 		gui.SetColor(defColor);
 		gui.SetCurPos(0, 0);
 		int message = gui.input(-1, -1, defColor, 31, 20, 48, 3);
@@ -363,7 +372,7 @@ VOID DrawChatGUI(VOID) {
 						gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 					}
 					else {
-						gui.processMessageEvent(conversation, "", "Сообщение небыло отправлено! SendTo() error");
+						gui.processMessageEvent(conversation, "Error", "Сообщение небыло отправлено! SendTo() error");
 					}
 				}
 				gui.clearInput(message);
