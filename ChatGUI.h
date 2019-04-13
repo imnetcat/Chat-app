@@ -1,9 +1,10 @@
 #pragma once
 #include <algorithm>
 
+constexpr int MAXNICKLENGTH = 30;
 VOID WINAPI ServerHandle(CONST HANDLE);
 bool SendTo(string, string);
-string ReciverAddress;
+string ReceiverAddress;
 
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -354,11 +355,11 @@ VOID DrawChatGUI(VOID) {
 						params.port = toIntA((char*)port.c_str());
 						CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ServerHandle, &params, 0, NULL);
 					}
-					if ((pos = inputText.find("/reciver ")) != string::npos) { // Введена комманда подключения к адресу
-						ReciverAddress = inputText.substr(9, inputText.length());
+					if ((pos = inputText.find("/receiver ")) != string::npos) { // Введена комманда подключения к адресу
+						ReceiverAddress = inputText.substr(9, inputText.length());
 					}
 				} else { // Введено сообщение
-					if (SendTo(ReciverAddress, gui.getInputText(message))) {
+					if (SendTo(ReceiverAddress, gui.getInputText(message))) {
 						gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 					}
 					else {

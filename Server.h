@@ -7,10 +7,18 @@ SOCKET SendSock;
 bool SendTo(string addr, string data) {
 	
 	data += '\0';
-	int packet_Size = data.size();
-	if (packet_Size > 256) {
+	int data_size = data.length();
+	if (data_size + MAXNICKLENGTH > 256) {
 		return false;
 	}
+
+	string nick = gui.getInputText(nickname);
+	while (nick.length() < MAXNICKLENGTH) {
+		nick += ' ';
+	}
+
+	string pack = nick + data;
+	int pack_size = pack.length();
 
 	size_t pos = addr.find('.');
 	string aStr = addr.substr(0, pos);
@@ -39,11 +47,10 @@ bool SendTo(string addr, string data) {
 	address.sin_addr.s_addr = htonl(destination_address);
 	address.sin_port = htons(destination_port);
 
-	const char *packet_data = data.c_str();
-	int sent_bytes = sendto(SendSock, packet_data, packet_Size,
+	int sent_bytes = sendto(SendSock, pack.c_str(), pack_size,
 		0, (sockaddr*)&address, sizeof(sockaddr_in));
 
-	if (sent_bytes != packet_Size)
+	if (sent_bytes != pack_size)
 	{
 		return false;
 	}
@@ -124,7 +131,9 @@ VOID WINAPI ServerHandle(LPVOID p) {
 		unsigned int from_port = ntohs(from.sin_port);
 
 		// process received packet
-		gui.processMessageEvent(conversation, "RECIVED: ", packet_data, gui.inputID);
+		PROTOCOL::PACKET packet = ParseAndDecrypt(packet_data);
+
+		gui.processMessageEvent(conversation, packet.senderNick, packet.message, gui.inputID);
 	}
 
 	return;
