@@ -1,10 +1,9 @@
 #pragma once
 #include <algorithm>
 
-VOID Server(VOID);
-DWORD WINAPI ServerHandle(CONST HANDLE);
-BOOL addConnection(SOCKET);
-BOOL Connection(string);
+VOID WINAPI ServerHandle(CONST HANDLE);
+bool SendTo(string, string);
+string ReciverAddress;
 
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -333,13 +332,11 @@ VOID DrawChatGUI(VOID) {
 		gui.SetColor(FOREGROUND_RED);
 		gui.WriteText(0, 24, "──┤");
 		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-		gui.WriteText(3, 24, "READY");
+		gui.WriteText(3, 24, "start server with /start [port]");
 		gui.SetColor(defColor);
 		gui.SetCurPos(0, 0);
 		int message = gui.input(-1, -1, defColor, 31, 20, 48, 3);
         gui.inputID = message;
-
-		Server();
 
 		char ch;
 		while (window == "main") {
@@ -347,29 +344,28 @@ VOID DrawChatGUI(VOID) {
 
 			if (ch == ENTER) {
 				string inputText = gui.getInputText(message);
-                // FOR WRITE MESSAGE IN WINDOW USE
-                //gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
-					if ((pos = inputText.find("/Connect to ")) != string::npos) { // Введена комманда подключения к адресу
-						string ip = inputText.substr(12, inputText.length());
-						Connection(ip);
+					if ((pos = inputText.find("/start ")) != string::npos) { // Введена комманда подключения к адресу
+						string port = inputText.substr(7, inputText.length());
+						THREADPARAMS params;
+						params.mut = CreateMutex(NULL, FALSE, NULL);
+						params.port = toIntA((char*)port.c_str());
+						CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ServerHandle, &params, 0, NULL);
+					}
+					if ((pos = inputText.find("/reciver ")) != string::npos) { // Введена комманда подключения к адресу
+						ReciverAddress = inputText.substr(9, inputText.length());
 					}
 				} else { // Введено сообщение
-					gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
-					gui.clearInput(message);
+					if (SendTo(ReciverAddress, gui.getInputText(message))) {
+						gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
+					}
+					else {
+						gui.processMessageEvent(conversation, "", "Сообщение небыло отправлено! SendTo() error");
+					}
 				}
-
-                // DO SOMETHING
-                // FOR GET INPUT VALUE USE "gui.getInputText(message);"
-                //SAMPLE
-                /* if (ERROR) {
-                    ENTER = false;
-                    SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-                    WriteText(3, 24, ERROR_TEXT);
-                    SetColor(defColor);
-                } */
+				gui.clearInput(message);
             }
 
             if (ch == ESC) {

@@ -27,6 +27,10 @@ void *get_in_addr(struct sockaddr *sa)
 	}
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
+struct THREADPARAMS {
+	HANDLE mut;
+	int port;
+};
 PSTR getServerAddress() {
 	PMIB_IPADDRTABLE pIPAddrTable;
 	DWORD dwSize = 0;

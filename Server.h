@@ -2,173 +2,132 @@
 
 
 
-fd_set master; // 
-int fdmax;
+SOCKET SendSock;
 
-BOOL addConnection(SOCKET s) {
-
-	if (s == -1) {
-		gui.processMessageEvent(conversation, "", "addConnection() ERROR");
-		closesocket(s);
-		return FALSE;
+bool SendTo(string addr, string data) {
+	
+	data += '\0';
+	int packet_Size = data.size();
+	if (packet_Size > 256) {
+		return false;
 	}
-	else {
-		PROTO.connections++;
-		FD_SET(s, &master); // 
-		if (s > fdmax) { // 
-			fdmax = s;
-		}
-		gui.processMessageEvent(conversation, "", "Новое подключение принято");
-		/* Вывод подключенного ip
-		cout << "New connection from " <<
-			inet_ntop(remoteaddr.ss_family,
-				get_in_addr((struct sockaddr*)&remoteaddr),
-				remoteIP, INET6_ADDRSTRLEN)
-			<< endl;
-		*/
-		return TRUE;
+
+	size_t pos = addr.find('.');
+	string aStr = addr.substr(0, pos);
+	addr.erase(0, pos + 1);
+	pos = addr.find('.');
+	string bStr = addr.substr(0, pos);
+	addr.erase(0, pos + 1);
+	pos = addr.find('.');
+	string cStr = addr.substr(0, pos);
+	addr.erase(0, pos + 1);
+	pos = addr.find(':');
+	string dStr = addr.substr(0, pos);
+	string pStr = addr.substr(pos + 1, addr.length());
+
+	unsigned int a = toIntA((char*)aStr.c_str());
+	unsigned int b = toIntA((char*)bStr.c_str());
+	unsigned int c = toIntA((char*)cStr.c_str());
+	unsigned int d = toIntA((char*)dStr.c_str());
+	unsigned short port = toIntA((char*)pStr.c_str());
+
+	unsigned int destination_address = (a << 24) | (b << 16) | (c << 8) | d;
+	unsigned short destination_port = port;
+
+	sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = htonl(destination_address);
+	address.sin_port = htons(destination_port);
+
+	const char *packet_data = data.c_str();
+	int sent_bytes = sendto(SendSock, packet_data, packet_Size,
+		0, (sockaddr*)&address, sizeof(sockaddr_in));
+
+	if (sent_bytes != packet_Size)
+	{
+		return false;
 	}
 }
 
-DWORD WINAPI ServerHandle(CONST HANDLE sMutex) {
+VOID WINAPI ServerHandle(LPVOID p) {
+	THREADPARAMS params = *(THREADPARAMS *)p;
+	PROTO.PORT = params.port;
+	CONST HANDLE sMutex = params.mut;
 	WaitForSingleObject(sMutex, INFINITE);
 
-	int nbytes;
-	FD_ZERO(&master); // 
-	SOCKET s;
-	fd_set read_fds; // 
-	FD_ZERO(&read_fds);
-	const int max_client_buffer_size = 1024;
-	SOCKET client_socket = INVALID_SOCKET;
-	int j, n2;
-
-	FD_SET(PROTO.SOCK, &master);
-	// 
-	fdmax = PROTO.SOCK; //
-
-	// 
-	for (;;) {
-		read_fds = master; // 
-		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
-			gui.processMessageEvent(conversation, "", "select() ERROR");
-		}
-		// 
-		for (s = 0; s <= fdmax; s++) {
-			if (FD_ISSET(s, &read_fds)) { // 
-				for (j = 0; j < PROTO.clientSock.size(); j++) {
-					if (PROTO.clientSock[j] == s) {
-						break;
-					}
-				}
-				if (s == PROTO.SOCK) {
-					// 
-					struct sockaddr_storage remoteaddr;
-					socklen_t addrlen;
-					gui.processMessageEvent(conversation, "", "Входящее подключение");
-					addrlen = sizeof remoteaddr;
-					PROTO.clientSock.push_back(accept(PROTO.SOCK,
-						(struct sockaddr *)&remoteaddr,
-						&addrlen));
-
-					addConnection(PROTO.clientSock[PROTO.clientSock.size()-1]);
-				}
-				else {
-					// 
-					if ((nbytes = recv(s, buf, sizeof(buf), 0)) <= 0) {
-						// 
-						if (nbytes == 0) {
-							// 
-							gui.processMessageEvent(conversation, "", "Подключение потеряно");
-						}
-						else {
-							// 
-							gui.processMessageEvent(conversation, "", "Подключение закрыто");
-						}
-						//
-						PROTO.connections--;
-						closesocket(PROTO.clientSock[j]); // 
-						PROTO.clientSock.erase(PROTO.clientSock.end() - 1);
-						FD_CLR(PROTO.clientSock[j], &master); // 
-					}
-					else {
-						//
-
-						std::string temp(buf);
-
-						if (strlen(buf) == BUFSIZE + 1) {
-							temp[BUFSIZE] = '\0';
-						}
-
-						ParseAndDecrypt(temp);
-
-						ZeroMemory(&buf, sizeof(buf));
-					}
-				} // END 
-			} // END 
-		} // END 
-	}// END for(;;)
-}
-
-VOID Server(VOID) {
-	
-
-	WSADATA wsaData;
-	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-	if (result != 0) {
-		gui.processMessageEvent(conversation, "", "WSAStartup() ERROR");
-		return;
-	}
-
-	struct addrinfo* addr = NULL;
-	struct addrinfo hints;
-	ZeroMemory(&hints, sizeof(hints));
-
-	hints.ai_family = AF_INET; 
-	hints.ai_socktype = SOCK_STREAM; 
-	hints.ai_protocol = IPPROTO_TCP; 
-	hints.ai_flags = AI_PASSIVE; 
-
 	PROTO.ADDR = getServerAddress();
-	result = getaddrinfo(PROTO.ADDR, PROTO.PORT, &hints, &addr);
-	if (result != 0) {
-		gui.processMessageEvent(conversation, "", "getaddrinfo() ERROR");
-		WSACleanup(); 
+
+	WSADATA WsaData;
+	WSAStartup(MAKEWORD(2, 2), &WsaData);
+
+
+	SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	if (sock == INVALID_SOCKET)
+	{
+		gui.processMessageEvent(conversation, "", "failed to create socket");
 		return;
 	}
 
-	PROTO.SOCK = socket(addr->ai_family, addr->ai_socktype,
-		addr->ai_protocol);
-	if (PROTO.SOCK == INVALID_SOCKET) {
-		gui.processMessageEvent(conversation, "", "Socket create ERROR");
-		freeaddrinfo(addr);
-		WSACleanup();
+	sockaddr_in address;
+	address.sin_family = AF_INET;
+	inet_pton(AF_INET, PROTO.ADDR, &(address.sin_addr.s_addr));
+	address.sin_port = htons(PROTO.PORT);
+
+	if (bind(sock, (const sockaddr*)&address, sizeof(address)) == INVALID_SOCKET)
+	{
+		gui.processMessageEvent(conversation, "", "failed to bind socket");
 		return;
 	}
 
-	result = bind(PROTO.SOCK, addr->ai_addr, (int)addr->ai_addrlen);
-	if (result == SOCKET_ERROR) {
-		gui.processMessageEvent(conversation, "", "bind() ERROR");
-		freeaddrinfo(addr);
-		closesocket(PROTO.SOCK);
-		WSACleanup();
+	SendSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	if (SendSock <= 0)
+	{
+		printf("failed to create socket\n");
 		return;
 	}
 
-	if (listen(PROTO.SOCK, SOMAXCONN) == SOCKET_ERROR) {
-		gui.processMessageEvent(conversation, "", "listen() ERROR");
-		closesocket(PROTO.SOCK);
-		WSACleanup();
+	sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(PROTO.PORT + 1);
+
+	if (bind(SendSock, (const sockaddr*)&addr, sizeof(sockaddr_in)) < 0)
+	{
+		printf("failed to bind socket\n");
 		return;
 	}
 
+	//  Сервер и клиент открыты, вывод ip сервера
+	gui.WriteText(3, 24, PROTO.ADDR + string(":") + toStrA(PROTO.PORT), gui.inputID);
 
 
-	//  Сервер открыт, вывод ip сервера
-	gui.WriteText(3, 24, PROTO.ADDR, gui.inputID);
 
+	while (true)
+	{
+		char packet_data[256];
+		unsigned int maximum_packet_size = sizeof(packet_data);
 
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ServerHandle, CreateMutex(NULL, FALSE, NULL), 0, NULL);
+		typedef int socklen_t;
 
+		sockaddr_in from;
+		socklen_t fromLength = sizeof(from);
+
+		int received_bytes = recvfrom(sock, (char*)packet_data, maximum_packet_size,
+			0, (sockaddr*)&from, &fromLength);
+
+		if (received_bytes <= 0)
+			break;
+
+		unsigned int from_address = ntohl(from.sin_addr.s_addr);
+		unsigned int from_port = ntohs(from.sin_port);
+
+		// process received packet
+		gui.processMessageEvent(conversation, "RECIVED: ", packet_data);
+		cout << packet_data;
+	}
+
+	return;
 
 }
