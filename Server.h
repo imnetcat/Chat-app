@@ -124,8 +124,7 @@ VOID WINAPI ServerHandle(LPVOID p) {
 		unsigned int from_port = ntohs(from.sin_port);
 
 		// process received packet
-		gui.processMessageEvent(conversation, "RECIVED: ", packet_data);
-		cout << packet_data;
+		gui.processMessageEvent(conversation, "RECIVED: ", packet_data, gui.inputID);
 	}
 
 	return;
