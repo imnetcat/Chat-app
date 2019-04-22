@@ -1,7 +1,7 @@
 #pragma once
 
 SOCKET sock;
-const char* host = "chatserver.herokuapp.com";
+const char* host = "chatstunserver.herokuapp.com";
 WORD port = 80;
 
 BOOL SetUpConnection()
