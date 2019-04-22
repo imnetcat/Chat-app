@@ -221,7 +221,8 @@ void WINAPI receiveData(CONST HANDLE sMutex){
 				received_data += str_data;
 				if (received_data_size == full_data_size) {
 					if (received_data != "ping") {
-						gui.processMessageEvent(conversation, "", received_data);
+						PROTOCOL::PACKET packet_data = ParseAndDecrypt(received_data);
+						gui.processMessageEvent(conversation, packet_data.senderNick, packet_data.message);
 					}
 					received_data = "";
 					received_data_size = 0;
@@ -266,7 +267,7 @@ BOOL SendNick() {
 
 BOOL SendMessageTo(string receiver, string message) {
 	string data;
-	data = "{" + receiver + "}" + "{" + message + "}";
+	data = "{" + Nick + "}" + "{" + receiver + "}" + "{" + message + "}";
 	if (SendTo(data)) {
 		return TRUE;
 	}

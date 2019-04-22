@@ -11,7 +11,7 @@ int main()
 {
 	SetConsoleCP(866);
 	SetConsoleOutputCP(866);
-	SetConsoleTitleA("Console chat ~~~ 0.2.0");
+	SetConsoleTitleA("Console chat ~~~ 0.2.1");
 	system("mode con cols=80 lines=25");
 
 	DrawChatGUI();
