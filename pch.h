@@ -1,8 +1,11 @@
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <iostream>
 #include <conio.h>
 #include <string>
 #include <vector>
+#include <sstream>  // Для stringstream  
 #include <ws2tcpip.h> // Для сокетов
 #include <winsock2.h> // Для сокетов
 #include <iphlpapi.h> // Для GetIpAddrTable

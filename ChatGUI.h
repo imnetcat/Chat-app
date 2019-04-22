@@ -2,9 +2,10 @@
 #include <algorithm>
 
 constexpr int MAXNICKLENGTH = 30;
-VOID WINAPI ServerHandle(CONST HANDLE);
-bool SendTo(string, string);
-string ReceiverAddress;
+string ReceiverNick;
+string Nick;
+BOOL Connect2Server(VOID);
+BOOL SendMessageTo(string, string);
 
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -299,7 +300,10 @@ VOID DrawChatGUI(VOID) {
 				if (nick != "") {
 					if (pass != "") {
 						if (pass == password) {
-							window = "main"; // SUCCESSFULLY SIGNED IN
+							Nick = nick;
+							if (Connect2Server()) {
+								window = "main"; // SUCCESSFULLY SIGNED IN
+							}
 						}
 						else {
 							gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
@@ -341,9 +345,8 @@ VOID DrawChatGUI(VOID) {
 		gui.drawButton(2, 21, "Exit", "ESC", FOREGROUND_RED, FOREGROUND_RED);
 		gui.SetColor(FOREGROUND_RED);
 		gui.WriteText(0, 24, "──┤");
-		gui.SetColor(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED | BACKGROUND_RED);
-		gui.WriteText(3, 24, "start server with /start [port]", -1, true);
 		gui.SetColor(defColor);
+		gui.WriteText(3, 24, "Ваш ник в системе: "+Nick, -1, true);
 		gui.SetCurPos(0, 0);
 		int message = gui.input(-1, -1, defColor, 31, 20, 48, 3);
         gui.inputID = message;
@@ -357,22 +360,16 @@ VOID DrawChatGUI(VOID) {
 
 				if (inputText[0] == '/') { // Введена комманда
 					size_t pos;
-					if ((pos = inputText.find("/start ")) != string::npos) { // Введена комманда подключения к адресу
-						string port = inputText.substr(7, inputText.length());
-						THREADPARAMS params;
-						params.mut = CreateMutex(NULL, FALSE, NULL);
-						params.port = toIntA((char*)port.c_str());
-						CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ServerHandle, &params, 0, NULL);
-					}
-					if ((pos = inputText.find("/receiver ")) != string::npos) { // Введена комманда подключения к адресу
-						ReceiverAddress = inputText.substr(9, inputText.length());
+					if ((pos = inputText.find("/r ")) != string::npos) {
+						ReceiverNick = inputText.substr(3, inputText.length());
+						gui.processMessageEvent(conversation, "", "Получатель установлен: " + ReceiverNick);
 					}
 				} else { // Введено сообщение
-					if (SendTo(ReceiverAddress, gui.getInputText(message))) {
-						gui.processMessageEvent(conversation, gui.getInputText(nickname), gui.getInputText(message));
+					if (SendMessageTo(ReceiverNick, inputText)) {
+						gui.processMessageEvent(conversation, Nick, inputText);
 					}
 					else {
-						gui.processMessageEvent(conversation, "Error", "Сообщение небыло отправлено! SendTo() error");
+						gui.processMessageEvent(conversation, "", "Сообщение небыло отправлено! SendTo() error");
 					}
 				}
 				gui.clearInput(message);
