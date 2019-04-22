@@ -155,7 +155,7 @@ void WINAPI receiveData(CONST HANDLE sMutex){
 	int data_size;
 	char buffer[512];
 	string received_data;
-	long long int full_data_size = 0;
+	long int full_data_size = 0;
 	int received_data_size = 0;
 	while (true)
 	{
@@ -204,8 +204,10 @@ void WINAPI receiveData(CONST HANDLE sMutex){
 				{
 					full_data_size = frame[0];
 				} else {
-					full_data_size = frame[1] * 256;
+					int temp = frame[1] * 256;
+					full_data_size = ~temp;
 					full_data_size += frame[2];
+					full_data_size = 257 + full_data_size;
 				}
 
 				if (data_size <= 126) 
