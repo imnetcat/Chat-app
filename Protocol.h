@@ -26,7 +26,8 @@ PROTOCOL::PACKET ParseAndDecrypt(string data) { // {Sender_Nick}{Receiver_Nick}{
 
 	data.erase(0, pos + 2);
 	pos = data.find('}');
-	string message = data.substr(pos+2, data.length()-4);
+	data.erase(0, pos + 2);
+	string message = data.substr(0, data.length()-1);
 
 	PROTOCOL::PACKET p;
 	p.message = message;
