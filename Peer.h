@@ -222,7 +222,7 @@ void WINAPI receiveData(CONST HANDLE sMutex){
 				if (received_data_size == full_data_size) {
 					if (received_data != "ping") {
 						PROTOCOL::PACKET packet_data = ParseAndDecrypt(received_data);
-						gui.processMessageEvent(conversation, packet_data.senderNick, packet_data.message);
+						gui.processMessageEvent(conversation, packet_data.senderNick, packet_data.message, gui.inputID);
 					}
 					received_data = "";
 					received_data_size = 0;
