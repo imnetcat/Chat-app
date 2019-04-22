@@ -25,8 +25,8 @@ class GUI {
 			if (debug) {
 				CONSOLE_SCREEN_BUFFER_INFO _csbi;
 				GetConsoleScreenBufferInfo(hStdOut, &_csbi);
-				string emptyStr(_csbi.srWindow.Right - (int)text.size() - 3, ' ');
-				WORD color = csbi.wAttributes;
+				string emptyStr((int)_csbi.srWindow.Right - (int)text.size() - 3, ' ');
+				WORD color = _csbi.wAttributes;
 
 				cout << text;
 				SetColor(defColor);
